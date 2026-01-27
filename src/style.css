@@ -1,0 +1,316 @@
+/* =========================
+   RESET + BASE
+========================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f6f7f9;
+  color: #111827;
+  line-height: 1.45;
+}
+
+/* =========================
+   COLOR TOKENS
+========================= */
+:root {
+  --primary: #e11d48;
+  --primary-soft: #fff1f2;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --card-bg: #ffffff;
+  --hover-bg: #f9fafb;
+}
+
+/* =========================
+   PAGE + LAYOUT
+========================= */
+.page {
+  max-width: 1920px;   /* 1280 → 1440 */
+  margin: 0 auto;
+  padding: 16px 24px;  /* sağ-sol biraz açıldı */
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 840px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   SIDEBAR (FILTER PLACEHOLDER)
+========================= */
+.sidebar {
+  position: sticky;
+  top: 16px;
+  align-self: flex-start;
+}
+
+.sidebarCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+
+.sidebarTitle {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.sidebarDesc {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* =========================
+   HEADER + CONTROLS
+========================= */
+.pageHeader {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.select {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: white;
+  font-weight: 600;
+}
+
+/* =========================
+   DATATABLE WRAP
+========================= */
+.tableWrap {
+  background: var(--card-bg);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+/* =========================
+   TABLE CONTENT
+========================= */
+.thumb {
+  width: 120px;
+  height: 90px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #eee;
+  transition: transform 0.25s ease;
+}
+
+.modelName {
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.listingTitle {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.priceText {
+  font-weight: 900;
+  color: var(--primary);
+}
+
+/* =========================
+   HOVER EFFECTS ✨
+========================= */
+.p-datatable tbody tr {
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.p-datatable tbody tr:hover {
+  background: var(--hover-bg);
+}
+
+.p-datatable tbody tr:hover .thumb {
+  transform: scale(1.04);
+}
+
+/* Detay butonu */
+.detailBtn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, #111827, #1f2937);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.detailBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+
+/* =========================
+   FILTER UI
+========================= */
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.filterLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.filterInput {
+  width: 100%;
+}
+
+.applyBtn {
+  margin-top: 14px;
+  height: 38px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, var(--primary), #be123c);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.clearBtn {
+  margin-top: 8px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dialogActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.content {
+  min-width: 0;
+}
+
+.tableWrap {
+  background: var(--card-bg);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  padding: 4px;
+}
+
+.filterBtn {
+  display: none;
+}
+
+
+@media (max-width: 840px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .filterBtn {
+    display: inline-flex;
+  }
+
+  .page {
+    padding: 12px;
+  }
+}
+
+
+.textInput {
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0 12px;
+  font-weight: 600;
+  outline: none;
+  background: #fff;
+}
+
+.textInput:focus {
+  border-color: rgba(225, 29, 72, 0.45);
+  box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.08);
+}
+
+.filterError {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #b91c1c;
+  background: #fff1f2;
+  border: 1px solid #fecaca;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
