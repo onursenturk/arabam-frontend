@@ -49,9 +49,8 @@
       <!-- Sağ: Liste -->
       <main class="content">
         <header class="pageHeader">
-          <div>
+          <div class="listingTitleWrap">
             <h1 class="title">İlanlar</h1>
-            <p class="subtitle">Listing (server-side pagination + yıl filtresi)</p>
           </div>
 
           <div class="controls">
@@ -223,139 +222,145 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Dialog from 'primevue/dialog'
+import { useQuery } from "@tanstack/vue-query";
 
-import { getListing } from '@/core/api/adverts.service'
-import { resolvePhotoUrl, getProp, formatKm } from '@/core/api/adverts.helpers'
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
 
-const router = useRouter()
+import { getListing } from "@/core/api/adverts.service";
+import { resolvePhotoUrl, getProp, formatKm } from "@/core/api/adverts.helpers";
 
-// data
-const items = ref([])
-const loading = ref(false)
-const error = ref(null)
+const router = useRouter();
 
 // pagination
-const take = ref(20)
-const skip = ref(0)
+const take = ref(20);
+const skip = ref(0);
 
 // sort
-const sort = ref(1) // 0: price, 1: date, 2: year
-const sortDirection = ref(0) // 0 asc, 1 desc
+const sort = ref(1); // 0: price, 1: date, 2: year
+const sortDirection = ref(0); // 0 asc, 1 desc
 
+// filters (year)
+const minYearInput = ref("");
+const maxYearInput = ref("");
+const filterError = ref(null);
 
-const minYearInput = ref('')
-const maxYearInput = ref('')
-const filterError = ref(null)
+const showFilter = ref(false);
 
-const showFilter = ref(false)
-
-
-const totalRecords = ref(1000)
-
+// ---- helpers
 function goDetail(id) {
-  router.push(`/advert/${id}`)
+  router.push(`/advert/${id}`);
 }
 
 function onRowClick(event) {
-  const id = event?.data?.id
-  if (id) goDetail(id)
+  const id = event?.data?.id;
+  if (id) goDetail(id);
 }
 
 function parseYear(input) {
-  const s = String(input ?? '').trim()
-  if (!s) return undefined
-  const n = Number(s)
-  if (!Number.isFinite(n)) return undefined
-  if (!Number.isInteger(n)) return undefined
-  if (n < 1900 || n > 2100) return undefined
-  return n
+  const s = String(input ?? "").trim();
+  if (!s) return undefined;
+
+  const n = Number(s);
+  if (!Number.isFinite(n)) return undefined;
+  if (!Number.isInteger(n)) return undefined;
+  if (n < 1900 || n > 2100) return undefined;
+
+  return n;
 }
 
-const minYear = computed(() => parseYear(minYearInput.value))
-const maxYear = computed(() => parseYear(maxYearInput.value))
+const minYear = computed(() => parseYear(minYearInput.value));
+const maxYear = computed(() => parseYear(maxYearInput.value));
 
 function validateYearRange() {
-  filterError.value = null
+  filterError.value = null;
 
   if (String(minYearInput.value).trim() && minYear.value === undefined) {
-    filterError.value = 'Min yıl geçersiz. Örn: 2018'
-    return false
+    filterError.value = "Min yıl geçersiz. Örn: 2018";
+    return false;
   }
   if (String(maxYearInput.value).trim() && maxYear.value === undefined) {
-    filterError.value = 'Max yıl geçersiz. Örn: 2024'
-    return false
+    filterError.value = "Max yıl geçersiz. Örn: 2024";
+    return false;
   }
 
-  if (minYear.value !== undefined && maxYear.value !== undefined && minYear.value > maxYear.value) {
-    filterError.value = 'Min yıl, max yıldan büyük olamaz.'
-    return false
+  if (
+      minYear.value !== undefined &&
+      maxYear.value !== undefined &&
+      minYear.value > maxYear.value
+  ) {
+    filterError.value = "Min yıl, max yıldan büyük olamaz.";
+    return false;
   }
 
-  return true
+  return true;
 }
 
-async function load() {
-  loading.value = true
-  error.value = null
 
-  try {
-    const params = {
-      sort: sort.value,
-      sortDirection: sortDirection.value,
-      take: take.value,
-      skip: skip.value,
-      // ✅ yıl filtresi (boşsa eklemiyoruz)
-      ...(minYear.value !== undefined ? { minYear: minYear.value } : {}),
-      ...(maxYear.value !== undefined ? { maxYear: maxYear.value } : {}),
-    }
+const listingParams = computed(() => ({
+  sort: sort.value,
+  sortDirection: sortDirection.value,
+  take: take.value,
+  skip: skip.value,
+  ...(minYear.value !== undefined ? { minYear: minYear.value } : {}),
+  ...(maxYear.value !== undefined ? { maxYear: maxYear.value } : {}),
+}));
 
-    const data = await getListing(params)
 
-    items.value = Array.isArray(data) ? data : (data?.items || data?.listings || [])
+const listingQuery = useQuery({
+  queryKey: computed(() => ["adverts", "listing", listingParams.value]),
+  queryFn: () => getListing(listingParams.value),
+  keepPreviousData: true,
 
-  } catch (e) {
-    error.value = e?.message ?? String(e)
-  } finally {
-    loading.value = false
-  }
-}
+});
 
+const items = computed(() => {
+  const data = listingQuery.data.value;
+  return Array.isArray(data) ? data : (data?.items || data?.listings || []);
+});
+
+const loading = computed(() => listingQuery.isFetching.value);
+const error = computed(() => listingQuery.error.value?.message ?? null);
+
+
+const totalRecords = computed(() => {
+  const data = listingQuery.data.value;
+  return data?.totalRecords ?? data?.total ?? 1000;
+});
+
+// ---- UI events
 function reloadFromStart() {
-  skip.value = 0
-  load()
+  skip.value = 0;
+
 }
 
 function onTakeChange() {
-  reloadFromStart()
+  reloadFromStart();
 }
 
 function onPage(event) {
-  skip.value = event.first
-  take.value = event.rows
-  load()
+  skip.value = event.first;
+  take.value = event.rows;
+
 }
 
 function applyFilters() {
-  if (!validateYearRange()) return
-  skip.value = 0
-  showFilter.value = false
-  load()
+  if (!validateYearRange()) return;
+  skip.value = 0;
+  showFilter.value = false;
+
 }
 
 function clearFilters() {
-  minYearInput.value = ''
-  maxYearInput.value = ''
-  filterError.value = null
-  skip.value = 0
-  showFilter.value = false
-  load()
-}
+  minYearInput.value = "";
+  maxYearInput.value = "";
+  filterError.value = null;
+  skip.value = 0;
+  showFilter.value = false;
 
-onMounted(load)
+}
 </script>

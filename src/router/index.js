@@ -10,4 +10,15 @@ const routes = [
 export default createRouter({
     history: createWebHistory(),
     routes,
+
+    // 👇 BU KISIM ÖNEMLİ
+    scrollBehavior(to, from, savedPosition) {
+        // Geri / ileri tuşları (history)
+        if (savedPosition) {
+            return savedPosition
+        }
+
+        // Normal route değişiminde sayfanın en üstüne çık
+        return { top: 0 }
+    },
 })

@@ -1,12 +1,14 @@
 <template>
-  <main class="app">
-    <router-view />
+  <AppHeader />
+
+  <main class="appMain">
+    <RouterView />
   </main>
+
+  <AppFooter />
 </template>
 
-<style>
-.app {
-  min-height: 100vh;
-  padding: 16px;
-}
-</style>
+<script setup>
+import AppHeader from "@/components/AppHeader.vue";
+import AppFooter from "@/components/AppFooter.vue";
+</script>
